@@ -1,0 +1,28 @@
+pkg util =
+    const index       : (s: byte[:], i: uint64 -> char)
+    const digit2char  : (digit: byte -> char)
+
+    const cpu_speed    = 0x5010 castto (uint16#)
+    const active_cores = 0x5012 castto (uint16#)
+    const detect_cores = 0x5014 castto (uint16#)
+    const ram_size     = 0x5020 castto (uint32#)
+
+    generic nlen : (n: @T::(numeric,integral) -> uint32)
+;;
+
+const index = {s, i
+    -> ((s castto (uint64)) + i castto (char#))#
+}
+
+const digit2char = {d
+    -> d + 0x30 castto (char)
+}
+
+generic nlen = {n
+    var len = 0
+    while n/10 > 0
+        len++
+        n /= 10
+    ;;
+    -> len
+}

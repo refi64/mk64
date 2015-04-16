@@ -1,0 +1,93 @@
+type Color = union
+    `Black
+    `Blue
+    `Green
+    `Cyan
+    `Red
+    `White
+;;
+
+var vidptr: uint64 = 0xb8000
+var indent = 0
+
+const main = {
+    clearscreen()
+    screencolor(`Red, `White)
+    write("Hello, ")
+    write("world!")
+    writeln("")
+    writeln("!")
+    writeln("abc");
+    writec('\n')
+    writec('\t')
+    writeln("123")
+    while true ; ;;
+}
+
+const colortoint = {c: Color
+    match c
+    | `Black : ->  0
+    | `Blue  : ->  1
+    | `Green : ->  2
+    | `Cyan  : ->  3
+    | `Red   : ->  4
+    | `White : -> 15
+    ;;
+}
+
+const colortobyte = {bg: Color, fg: Color
+    -> colortoint(fg) + colortoint(bg)*0x10 castto (byte)
+}
+
+const screencolor = {bg, fg
+    var i
+    for i = 0; i < 80*25*2; i += 2
+        (vidptr+i+1 castto (byte#))# = colortobyte(bg, fg)
+    ;;
+}
+
+const clearscreen = {
+    var i
+    for i = 0; i < 80*25*2; i += 2
+        (vidptr+i castto (byte#))# = ' ' castto (byte)
+    ;;
+}
+
+const index = {s: byte[:], i: uint64
+    -> ((s castto (uint64)) + i castto (char#))#
+}
+
+const writec = {c
+    if c == '\n'
+        writeln("")
+        ->
+    ;;
+    if c == '\t'
+        writec(' ')
+        writec(' ')
+        writec(' ')
+        writec(' ')
+        ->
+    ;;
+    (vidptr castto (byte#))# = c castto (byte)
+    vidptr += 2
+    indent++
+    if indent == 80
+        indent = 0
+    ;;
+}
+
+const write = {s: byte[:]
+    var i
+    for i = 0; i < s.len; i++
+        writec(index(s, i))
+    ;;
+}
+
+const writeln = {s: byte[:]
+    write(s)
+
+    while indent != 0
+        writec(' ')
+    ;;
+}

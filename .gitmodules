@@ -1,0 +1,6 @@
+[submodule "Pure64"]
+	path = Pure64
+	url = https://github.com/ReturnInfinity/Pure64.git
+[submodule "BMFS"]
+	path = BMFS
+	url = https://github.com/ReturnInfinity/BMFS.git

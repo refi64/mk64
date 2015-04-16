@@ -1,0 +1,48 @@
+use io
+
+pkg interrupt =
+    const init_idt     : (-> void)
+    const kb_handler   : (-> void)
+;;
+
+extern const generic_handler : uint64
+extern const keyboard_w      : uint64
+extern const outb       : (port: uint16, data: byte -> void)
+extern const inb        : (port: uint16             -> byte)
+
+const install_gate = {f,g:uint64
+    var idt = 0 castto (uint64)
+    var faddr = f castto (uint64)
+    g <<= 4
+    (g castto (uint16#))# = faddr castto (uint16)
+    g += 16+4
+    (g castto (uint16#))# = faddr >> 16 castto (uint16)
+    g += 16
+    (g castto (uint32#))# = faddr >> 32 castto (uint32)
+}
+
+const clear_mask = {m: byte
+    var port: uint16
+    var bit = m
+    var omask
+    if m < 8; port = 0x21
+    else
+        port = 0xA1
+        bit -= 8
+    ;;
+    omask = inb(port) | (1 << bit) /* clear the specific bit */
+    outb(port, omask) /* write the new mask */
+}
+
+const init_idt = {
+    install_gate(generic_handler, 0x1)
+    install_gate(keyboard_w, 0x21)
+    clear_mask(0x01)
+    clear_mask(0x02)
+    clear_mask(0x08)
+}
+
+const kb_handler = {
+    io.writeln("Handler invoked!")
+    while true ; ;;
+}

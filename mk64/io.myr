@@ -1,0 +1,91 @@
+use util
+
+pkg io =
+    type Color = union
+        `Black
+        `Blue
+        `Green
+        `Cyan
+        `Red
+        `White
+    ;;
+
+    const screencolor : (bg: Color, fg: Color -> void)
+    const clearscreen : (-> void)
+    const writec      : (c: char -> void)
+    const write       : (s: byte[:] -> void)
+    const writeln     : (s: byte[:] -> void)
+
+    generic writen : (n: @T::(numeric, integral) -> void)
+
+    const vidptr: uint64 = 0xb8000
+;;
+
+var offs = 0
+
+const colortoint = {c: Color
+    match c
+    | `Black : ->  0
+    | `Blue  : ->  1
+    | `Green : ->  2
+    | `Cyan  : ->  3
+    | `Red   : ->  4
+    | `White : -> 15
+    ;;
+}
+
+const colortobyte = {bg: Color, fg: Color
+    -> colortoint(fg) + colortoint(bg)*0x10 castto (byte)
+}
+
+const screencolor = {bg, fg
+    var i
+    for i = 0; i < 80*25*2; i += 2
+        (vidptr+i+1 castto (byte#))# = colortobyte(bg, fg)
+    ;;
+}
+
+const clearscreen = {
+    var i
+    for i = 0; i < 80*25*2; i += 2
+        (vidptr+i castto (byte#))# = ' ' castto (byte)
+    ;;
+}
+
+const writec = {c
+    if c == '\n'
+        writeln("")
+        ->
+    ;;
+    if c == '\t'
+        writec(' ')
+        writec(' ')
+        writec(' ')
+        writec(' ')
+        ->
+    ;;
+    (vidptr+offs castto (byte#))# = c castto (byte)
+    offs += 2
+}
+
+const write = {s: byte[:]
+    var i
+    for i = 0; i < s.len; i++
+        writec(util.index(s, i))
+    ;;
+}
+
+const writeln = {s: byte[:]
+    write(s)
+
+    while offs/2 % 80 != 0
+        writec(' ')
+    ;;
+}
+
+generic writen = {n
+    var tmp = 0
+    var d = n/10
+    if d != 0; writen(d) ;;
+    writec(n%10 + 48 castto (char))
+}

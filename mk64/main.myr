@@ -1,0 +1,27 @@
+use interrupt
+use util
+use io
+
+const main = {
+    io.clearscreen()
+    io.screencolor(`io.Red, `io.White)
+    interrupt.init_idt()
+    io.write("Hello, ")
+    io.write("world!")
+    io.writeln("")
+    io.writeln("!")
+    io.writeln("abc");
+    io.writec('\n')
+    io.writec('\t')
+    io.writec('\n')
+
+    io.write("Cores: ")
+    io.writen(util.detect_cores#)
+    io.write(" present, ")
+    io.writen(util.active_cores#)
+    io.writeln(" active")
+    io.write("Cpu speed: ")
+    io.writen(util.cpu_speed#)
+    io.writeln(" MHz")
+    while true ; ;;
+}

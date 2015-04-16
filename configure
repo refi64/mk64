@@ -1,0 +1,24 @@
+#!/bin/sh
+
+getv()
+{
+    v=$(eval printf "%s" \${$1:-$2})
+    printf "\033[44m$1=$v\033[0m\n"
+    echo "$1=$v" >> config.mk
+}
+
+printf "" > config.mk
+getv CC cc
+getv LD ld
+getv MC 6m
+getv NASM nasm
+getv CAT cat
+getv QEMU qemu-system-x86_64
+getv DD dd
+getv CFLAGS
+getv MCFLAGS
+getv LDFLAGS
+
+echo "HAS_CONFIG=1" >> config.mk
+
+echo "Configure completed successfully!"
